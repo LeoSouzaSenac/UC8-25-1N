@@ -103,8 +103,3 @@ O projeto deve conter duas classes principais:
 1. Adicionar um botão para **limpar toda a mochila**.
 2. Exibir o **número total de Pokémons** na mochila em tempo real.
 3. Permitir **ordenar** as listas por nome ou nível.
-4. Implementar um **menu superior** com as opções “Adicionar”, “Remover” e “Sair”.
-
----
-
-Deseja que eu transforme esse enunciado em um **modelo de entrega para os alunos** (com campos para preencher nome, turma, data etc.)?
