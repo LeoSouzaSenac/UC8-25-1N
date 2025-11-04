@@ -26,7 +26,7 @@ O projeto deve permitir **interatividade via GUI**, utilizando componentes do **
 
 Os alunos devem criar os seguintes arquivos (cada um em seu próprio `.java`):
 
-1. **Personagem.java** – interface que define métodos obrigatórios para todos os personagens, como:
+1. **Personagem.java** – classe base que define métodos obrigatórios para todos os personagens, como:
 
    * `atacar()`
    * `usarHabilidade()`
