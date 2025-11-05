@@ -10,8 +10,6 @@ Neste exercício, vamos usar o conceito dos Livros-Jogos para desenvolver um **m
 
 ---
 
-
-
 # Trabalho: Jogo de Aventuras em Java (Java Swing)
 
 ## Objetivo
@@ -26,14 +24,7 @@ O projeto deve permitir **interatividade via GUI**, utilizando componentes do **
 
 Os alunos devem criar os seguintes arquivos (cada um em seu próprio `.java`):
 
-1. **Personagem.java** – classe base que define métodos obrigatórios para todos os personagens, como:
-
-   * `atacar()`
-   * `usarHabilidade()`
-   * `usarItem()`
-   * `fugir()`
-
-2. **Aventureiro.java** – classe abstrata que implementa `Personagem` e contém atributos comuns a todas as classes de aventureiro:
+1. **Personagem.java** – classe base que define os atributos e métodos comuns a todos os personagens (jogadores e inimigos):
 
    * `nome` (String)
    * `vida` (int)
@@ -41,51 +32,92 @@ Os alunos devem criar os seguintes arquivos (cada um em seu próprio `.java`):
    * `forca` (int)
    * `agilidade` (int)
 
-3. **Bárbaro.java**, **Mago.java**, **Arqueiro.java**, **Ladino.java** – classes concretas que herdam de `Aventureiro` e implementam regras de negócio específicas (RN).
+   Métodos obrigatórios:
 
-4. **Inimigo.java** – classe que representa inimigos do jogo, com atributos como:
+   * `atacar(Personagem inimigo)`
 
-   * `nome` (String)
-   * `vida` (int)
-   * `forca` (int)
-   * `agilidade` (int)
+   * `usarHabilidade(Personagem inimigo)`
 
-5. **Dados.java** – classe responsável por gerar rolagens de dados para determinar atributos e resultados de ações.
+   * `usarItem()`
 
-6. **Jogo.java** – classe principal que inicializa a interface Swing, gerencia menus e controla o fluxo do jogo.
+   * `fugir()`
+
+   * `rolarDados(int quantidade, int lados)`
+
+   * `calcularChanceDeAcerto(Personagem inimigo)`
+
+   > Essa será a **classe pai** de todas as classes de personagem jogável (Bárbaro, Mago, Arqueiro e Ladino) e também poderá ser estendida por **Inimigo**.
+
+2. **Bárbaro.java**, **Mago.java**, **Arqueiro.java**, **Ladino.java** – classes concretas que herdam de `Personagem` e implementam regras de negócio específicas (ver seção de RN por classe).
+
+3. **Inimigo.java** – classe que representa inimigos do jogo, herdando também de `Personagem`.
+
+4. **Dados.java** – classe responsável por gerar rolagens de dados para determinar atributos e resultados de ações.
+
+5. **Jogo.java** – classe principal que inicializa a interface Swing, gerencia menus, história e controla o fluxo do jogo.
 
 ---
 
-## Regras de Negócio
+## Regras de Negócio (RN)
 
 ### RN Gerais do Personagem
 
-* RN01: Nenhum objeto pode ser do tipo `Aventureiro` diretamente. Deve-se instanciar uma das classes derivadas (Bárbaro, Mago, Arqueiro, Ladino).
-* RN02: A vida inicial deve ser definida via rolagem de dados (1 dado para cada ponto base definido pela classe).
-* RN03: O jogador deve escolher rolar dados para cada atributo antes de iniciar o jogo.
-* RN04: Cada classe possui atributos e habilidades especiais:
+* **RN01:** Nenhum objeto pode ser instanciado diretamente do tipo `Personagem`.
+  Deve-se criar objetos apenas das classes derivadas (Bárbaro, Mago, Arqueiro, Ladino, Inimigo).
 
-  * **Bárbaro**: força alta, vida alta, mana baixa; habilidade especial: *Fúria* (ataque extra).
-  * **Mago**: força baixa, vida média, mana alta; habilidade especial: *Magia* (ataque mágico).
-  * **Arqueiro**: força média, vida média, agilidade alta; habilidade especial: *Tiro Preciso* (aumenta chance de acerto).
-  * **Ladino**: força média, vida média, agilidade muito alta; habilidade especial: *Evasão* (chance de fugir ou contra-atacar).
+* **RN02:** A vida inicial deve ser definida via rolagem de dados (exemplo: `3d6` = rolar 3 dados de 6 lados e somar).
+
+* **RN03:** O jogador deve rolar os dados para definir seus atributos antes de iniciar o jogo.
+
+* **RN04:** Cada classe de personagem possui **atributos e habilidades especiais**:
+
+  * **Bárbaro**: força alta, vida alta, mana baixa; habilidade *Fúria* (ataque extra).
+  * **Mago**: força baixa, vida média, mana alta; habilidade *Magia* (ataque mágico).
+  * **Arqueiro**: força média, vida média, agilidade alta; habilidade *Tiro Preciso* (maior chance de acerto).
+  * **Ladino**: força média, vida média, agilidade muito alta; habilidade *Evasão* (chance de escapar ou contra-atacar).
+
+* **RN05 (Chance de Acerto):**
+  Ao atacar, o personagem deve realizar um **teste de acerto**.
+
+  * A chance de acerto é calculada pela seguinte fórmula:
+
+    ```
+    chance = 50 + (agilidade - inimigo.agilidade) * 5
+    ```
+  * Um número aleatório de 0 a 100 é gerado.
+  * Se o número for menor ou igual à chance, o ataque acerta. Caso contrário, erra.
+  * A chance mínima é 10% e a máxima é 95%.
+
+* **RN06 (Dano):**
+  O dano causado é calculado como:
+
+  ```
+  dano = forca + rolagem de dado (1d6)
+  ```
+
+  No caso de habilidades especiais, o cálculo do dano pode variar conforme as regras de cada classe.
+
+---
 
 ### RN de Combate
 
-* RN05: O combate ocorre sempre quando o personagem encontra um inimigo.
-* RN06: Durante o combate, o jogador pode escolher entre:
+* **RN07:** O combate ocorre sempre que o jogador encontra um inimigo.
+* **RN08:** Durante o combate, o jogador pode escolher entre:
 
-  1. Atacar (dano baseado na força + rolagem de dados)
-  2. Usar Habilidade (varia por classe, consome mana se aplicável)
-  3. Usar Item (como poções de vida ou mana)
-  4. Fugir (chance de sucesso baseada na agilidade)
-* RN07: O inimigo sempre atacará no seu turno, com dano baseado em sua força + rolagem de dados.
+  1. **Atacar** (dano físico baseado na força + rolagem de dados)
+  2. **Usar Habilidade** (varia conforme a classe, consome mana)
+  3. **Usar Item** (poções de cura ou mana)
+  4. **Fugir** (chance baseada na agilidade)
+* **RN09:** O inimigo sempre contra-ataca no turno seguinte, caso ainda esteja vivo.
+* **RN10:** A batalha termina quando a vida de um dos personagens chega a 0.
+
+---
 
 ### RN de História e Escolhas
 
-* RN08: Cada cenário deve apresentar no mínimo **duas opções**, levando a caminhos diferentes.
-* RN09: Algumas escolhas podem impactar atributos, como ganhar vida, mana ou enfrentar inimigos mais fortes.
-* RN10: O jogo deve permitir múltiplas partidas sem reiniciar a aplicação, reiniciando atributos e história.
+* **RN11:** Cada cenário deve apresentar pelo menos **duas opções** de escolha para o jogador, levando a caminhos diferentes.
+* **RN12:** Algumas decisões podem alterar atributos (ganhar vida, mana, ouro, etc.) ou gerar combates.
+* **RN13:** O jogo deve permitir reiniciar uma nova partida sem encerrar a aplicação.
 
 ---
 
@@ -93,57 +125,56 @@ Os alunos devem criar os seguintes arquivos (cada um em seu próprio `.java`):
 
 ### Bárbaro
 
-* RN11: Recebe +2 de força adicional na criação do personagem.
-* RN12: Habilidade *Fúria* aumenta dano físico em 50% por um turno, custo de 1 mana.
+* **RN14:** Recebe +2 de força ao ser criado.
+* **RN15:** Habilidade *Fúria* aumenta o dano físico em 50% por um turno (custa 1 de mana).
 
 ### Mago
 
-* RN13: Recebe +3 de mana inicial.
-* RN14: Habilidade *Magia* causa dano mágico equivalente a 2 vezes a força + rolagem de dados, consome 2 de mana.
+* **RN16:** Recebe +3 de mana ao ser criado.
+* **RN17:** Habilidade *Magia* causa dano mágico equivalente a `(forca * 2) + rolagem de dado`, consome 2 de mana.
 
 ### Arqueiro
 
-* RN15: Recebe +3 de agilidade.
-* RN16: Habilidade *Tiro Preciso* aumenta a chance de acerto em 50% por um turno.
+* **RN18:** Recebe +3 de agilidade ao ser criado.
+* **RN19:** Habilidade *Tiro Preciso* aumenta a **chance de acerto em 50%** no próximo ataque.
 
 ### Ladino
 
-* RN17: Recebe +4 de agilidade.
-* RN18: Habilidade *Evasão* permite tentar fugir com 70% de chance ou contra-atacar com 30% de chance.
+* **RN20:** Recebe +4 de agilidade ao ser criado.
+* **RN21:** Habilidade *Evasão* concede 70% de chance de escapar de um combate ou 30% de chance de contra-atacar.
 
 ---
 
 ## Sugestões de Componentes Java Swing
 
-* **JFrame**: janela principal do jogo.
-* **JPanel**: divisões da interface, como painel de combate, painel de história e painel de atributos.
-* **JButton**: ações do jogador (atacar, usar habilidade, rolar dados).
-* **JLabel**: exibir texto da história, atributos e status do combate.
-* **JOptionPane**: diálogos de confirmação, escolha de caminhos ou nomes.
-* **JTextArea**: narrativa longa do jogo.
-* **JProgressBar** (opcional): mostrar vida do jogador e inimigos.
+* **JFrame** – janela principal do jogo.
+* **JPanel** – organização da tela (história, combate, atributos).
+* **JButton** – botões de ações (Atacar, Fugir, Usar Habilidade, etc.).
+* **JLabel** – exibição de textos e status do personagem.
+* **JOptionPane** – janelas de diálogo para escolhas e mensagens.
+* **JTextArea** – para exibir a narrativa do jogo.
+* **JProgressBar** – barras de vida e mana.
 
 ---
 
 ## Funcionalidades Obrigatórias
 
-1. Tela inicial pedindo o **nome do personagem** e escolha da **classe**.
-2. Botão para **rolar dados** e definir atributos do personagem.
-3. Exibir atributos do personagem em tempo real (JLabels ou JTable).
-4. Menu de combate interativo via botões (Atacar, Usar Habilidade, Usar Item, Fugir).
-5. Sistema de **história interativa** com decisões que afetam atributos ou enredo.
-6. Mensagens de vitória, derrota ou fuga com JOptionPane.
-7. Código organizado por classes e arquivos, respeitando herança e interface.
+1. Tela inicial pedindo o **nome do personagem** e **classe**.
+2. Botão para **rolar dados** e definir atributos.
+3. Exibir os **atributos** do personagem na tela.
+4. Sistema de **combate interativo** com botões de ação.
+5. História com **decisões múltiplas** e caminhos alternativos.
+6. Exibição de mensagens de vitória, derrota e eventos narrativos via **JOptionPane**.
+7. Código organizado, comentado e respeitando a **orientação a objetos**.
 
 ---
 
 ## Entrega
 
-* Projeto Java completo pronto para execução.
-* Cada classe em seu próprio arquivo `.java`.
-* O jogo deve ser executável via `Jogo.java`, que terá a classe main.
-* Comentários no código explicando o funcionamento de cada método e regras implementadas.
+* Projeto Java completo, com todas as classes separadas em arquivos `.java`.
+* Classe principal `Jogo.java` com o método `main()`.
+* Código legível e comentado, explicando a implementação das regras de negócio.
 
 ---
 
-**Boa sorte e boa aventura!**
+**Boa sorte, aventureiro! Que os dados estejam a seu favor. 🎲⚔️**
